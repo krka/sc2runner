@@ -92,7 +92,7 @@ function mousecolor {
 
 function tweak_key_repeat {
   # This works on X but not on wayland
-  local focused=$(xdotool getwindowfocus getwindowpid)
+  local focused=$(xdotool getwindowfocus getwindowpid 2>/dev/null)
 
   # Workaround for wayland - enable if process is running
   #local focused=$1
@@ -158,7 +158,8 @@ function optimize {
 }
 
 function main {
-  WINEDEBUG=-all wine ~/.wine/drive_c/Program\ Files/Blizzard\ App/Battle.net.exe 
+  ech "Launching Battle.net"
+  WINEDEBUG=-all wine ~/.wine/drive_c/Program\ Files/Blizzard\ App/Battle.net.exe &>/dev/null &
 
   local fast_repeat=""
  
@@ -183,6 +184,7 @@ function main {
 ech "Disable mouse acceleration"
 execute xset m 0 0
 
+ech "Disabling middle button emulation..."
 # Disable middle button emulation because that breaks SC2 mouse selection
 mouse_id=$(xinput list|grep SteelSeries|grep -Eo "id=[0-9]+"|cut -f 2 -d =)
 if [ "x" == "x$mouse_id" ] ; then
@@ -197,6 +199,6 @@ for line in $(xinput list-props $mouse_id|grep Emulation|grep -vE "\\s0$"); do
   execute xinput set-int-prop $mouse_id $prop 8 0
 done
 IFS=$OLD_IFS
-
+ech "Middle button emulation disabled"
 main
 
