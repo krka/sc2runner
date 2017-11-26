@@ -184,21 +184,28 @@ function main {
 ech "Disable mouse acceleration"
 execute xset m 0 0
 
-ech "Disabling middle button emulation..."
-# Disable middle button emulation because that breaks SC2 mouse selection
-mouse_id=$(xinput list|grep SteelSeries|grep -Eo "id=[0-9]+"|cut -f 2 -d =)
-if [ "x" == "x$mouse_id" ] ; then
-  ech "No mouse found. Aborting."
-  exit 1
-fi
+regex='[^A-Za-z0-9]+[:space:]*(.*)[:space:]*id=([0-9]+)'
+regex2="libinput[:space:]*([^:space:].*)[:space:]*\\(([0-9]+)\\).*:.*([0-9]+)"
+xinput list|grep -Eo "↳.*id=[0-9]+" | while read line ; do
+  if [[ $line =~ $regex ]] ; then
+    device="${BASH_REMATCH[1]}"
+    device=$(echo -n "$device" | sed 's/[[:blank:]]*$//')
+    id="${BASH_REMATCH[2]}"
 
-OLD_IFS=$IFS
-IFS=$'\n'
-for line in $(xinput list-props $mouse_id|grep Emulation|grep -vE "\\s0$"); do
-  prop=$(echo $line|grep -Eo "\\([0-9]+\\)"|grep -Eo "[0-9]+")
-  execute xinput set-int-prop $mouse_id $prop 8 0
+    xinput list-props $id | grep Emulation | while read line2 ; do
+      if [[ $line2 =~ $regex2 ]] ; then
+        text="${BASH_REMATCH[1]}"
+        text=$(echo -n "$text" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//')
+        prop="${BASH_REMATCH[2]}"
+        value="${BASH_REMATCH[3]}"
+        if [ $value != "0" ] ; then
+          ech "Setting $text = 0 for $device"
+          execute xinput set-int-prop $id $prop 8 0
+        fi
+      fi
+    done
+  fi
 done
-IFS=$OLD_IFS
-ech "Middle button emulation disabled"
+
 main
 
