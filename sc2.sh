@@ -1,9 +1,28 @@
 #!/bin/bash
 
+cpus=$(cpufreq-info |grep -E "CPU [0-9]+:$" | cut -f 3 -d " "|cut -f 1 -d ":")
+
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 . $DIR/util.sh
+
+function cpuperf {
+  echo "CPU performance"
+  for cpu in $cpus; do
+    execute cpufreq-set -c $cpu -d 3500000 -u 3500000
+    execute cpufreq-set -c $cpu -g performance
+  done
+}
+
+function cpusave {
+  echo "CPU powersave"
+  for cpu in $cpus; do
+    execute cpufreq-set -c $cpu -d 400000 -u 3500000
+    execute cpufreq-set -c $cpu -g powersave
+  done
+}
+
 
 function lower_all {
   lower "Battle.net.exe"
@@ -34,6 +53,7 @@ function cleanup {
   mousecolor "#000000"
 
   tweak_key_repeat
+  cpusave
 
   killproc "Battle.net.exe"
   killproc "Battle.net Help"
@@ -105,6 +125,8 @@ function optimize {
 
   mousecolor "$color"
 
+  cpuperf
+
   echo -e "Waiting for $CYAN$game$NO_COLOR ($LIGHT_CYAN$pid$NO_COLOR) to exit..."
   while ps --pid $pid > /dev/null; do
     lower_all
@@ -112,6 +134,8 @@ function optimize {
     sleep 5
   done
   echo
+
+  cpusave
 
   ech "$CYAN$game$NO_COLOR has exited"
 
@@ -151,4 +175,5 @@ function main {
 }
 
 main
+
 
