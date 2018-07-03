@@ -41,6 +41,13 @@ function killproc {
   fi
 }
 
+function killbnet {
+  killproc "Battle.net.exe"
+  killproc "Battle.net Help"
+  killproc "Agent.exe"
+}
+
+
 function cleanup {
   if [ "xDONE" == "x$CLEANUP" ] ; then
     exit 0
@@ -55,9 +62,7 @@ function cleanup {
   tweak_key_repeat
   cpusave
 
-  killproc "Battle.net.exe"
-  killproc "Battle.net Help"
-  killproc "Agent.exe"
+  killbnet
   killproc "SC2.*.exe"
   killproc "wineserver"
   killproc "C:\\\\windows\\\\system32"
@@ -108,6 +113,14 @@ function tweak_key_repeat {
   fi
 }
 
+function startbnet {
+  local bnetpid=`getpid Battle.net.exe`
+  if [ "x" == "x$bnetpid" ] ; then
+    ech "Launching Battle.net"
+    WINEDEBUG=-all wine ~/.wine/drive_c/Program\ Files/Blizzard\ App/Battle.net.exe &>/dev/null &
+  fi
+}
+
 function optimize {
   local pid=$1
   shift
@@ -126,6 +139,7 @@ function optimize {
   mousecolor "$color"
 
   cpuperf
+  killbnet
 
   echo -e "Waiting for $CYAN$game$NO_COLOR ($LIGHT_CYAN$pid$NO_COLOR) to exit..."
   while ps --pid $pid > /dev/null; do
@@ -134,6 +148,7 @@ function optimize {
     sleep 5
   done
   echo
+  startbnet
 
   cpusave
 
@@ -142,14 +157,6 @@ function optimize {
   mousecolor "#000000"
 
   echo
-}
-
-function startbnet {
-  local bnetpid=`getpid Battle.net`
-  if [ "x" == "x$bnetpid" ] ; then
-    ech "Launching Battle.net"
-    WINEDEBUG=-all wine ~/.wine/drive_c/Program\ Files/Blizzard\ App/Battle.net.exe &>/dev/null &
-  fi
 }
 
 function main {
