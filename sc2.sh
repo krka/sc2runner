@@ -166,6 +166,7 @@ function main {
     ech "Waiting for SC2 to start..."
     while true; do
       lower_all
+      disable_mouse_acceleration
 
       local pid=`getpid SC2.exe`
       if [ "x" != "x$pid" ] ; then

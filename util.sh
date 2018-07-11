@@ -45,26 +45,30 @@ function lower {
 ech "Disable mouse acceleration"
 execute xset m 0 0
 
-regex='[^A-Za-z0-9]+[:space:]*(.*)[:space:]*id=([0-9]+)'
-regex2="libinput[:space:]*([^:space:].*)[:space:]*\\(([0-9]+)\\).*:.*([0-9]+)"
-xinput list|grep -Eo "↳.*id=[0-9]+" | while read line ; do
-  if [[ $line =~ $regex ]] ; then
-    device="${BASH_REMATCH[1]}"
-    device=$(echo -n "$device" | sed 's/[[:blank:]]*$//')
-    id="${BASH_REMATCH[2]}"
+function disable_mouse_acceleration {
+  local regex='[^A-Za-z0-9]+[:space:]*(.*)[:space:]*id=([0-9]+)'
+  local regex2="libinput[:space:]*([^:space:].*)[:space:]*\\(([0-9]+)\\).*:.*([0-9]+)"
+  xinput list|grep -Eo "↳.*id=[0-9]+" | while read line ; do
+    if [[ $line =~ $regex ]] ; then
+      local device="${BASH_REMATCH[1]}"
+      local device=$(echo -n "$device" | sed 's/[[:blank:]]*$//')
+      local id="${BASH_REMATCH[2]}"
 
-    xinput list-props $id | grep Emulation | while read line2 ; do
-      if [[ $line2 =~ $regex2 ]] ; then
-        text="${BASH_REMATCH[1]}"
-        text=$(echo -n "$text" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//')
-        prop="${BASH_REMATCH[2]}"
-        value="${BASH_REMATCH[3]}"
-        if [ $value != "0" ] ; then
-          ech "Setting $text = 0 for $device"
-          execute xinput set-int-prop $id $prop 8 0
+      xinput list-props $id | grep Emulation | while read line2 ; do
+        if [[ $line2 =~ $regex2 ]] ; then
+          local text="${BASH_REMATCH[1]}"
+          local text=$(echo -n "$text" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//')
+          local prop="${BASH_REMATCH[2]}"
+          local value="${BASH_REMATCH[3]}"
+          if [ $value != "0" ] ; then
+            ech "Setting $text = 0 for $device"
+            execute xinput set-int-prop $id $prop 8 0
+          fi
         fi
-      fi
-    done
-  fi
-done
+      done
+    fi
+  done
+}
+
+disable_mouse_acceleration
 
