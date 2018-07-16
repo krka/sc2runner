@@ -155,6 +155,7 @@ function main {
   startbnet
   local fast_repeat=""
   while true; do
+    killproc "winedbg" # SystemSurvey always crashes, which leads to winedbg starting
     ech "Waiting for SC2 to start..."
     while true; do
       lower_all
