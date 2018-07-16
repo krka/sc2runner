@@ -42,10 +42,12 @@ function lower {
   fi
 }
 
-ech "Disable mouse acceleration"
-execute xset m 0 0
-
 function disable_mouse_acceleration {
+  if ! xset q|grep -A 1 "Pointer Control:"|tail -n 1|grep "acceleration:  0/1    threshold:  0" > /dev/null ; then
+    ech "Disable mouse acceleration"
+    xset m 0 0
+  fi
+
   local regex='[^A-Za-z0-9]+[:space:]*(.*)[:space:]*id=([0-9]+)'
   local regex2="libinput[:space:]*([^:space:].*)[:space:]*\\(([0-9]+)\\).*:.*([0-9]+)"
   xinput list|grep -Eo "↳.*id=[0-9]+" | while read line ; do
@@ -61,8 +63,9 @@ function disable_mouse_acceleration {
           local prop="${BASH_REMATCH[2]}"
           local value="${BASH_REMATCH[3]}"
           if [ $value != "0" ] ; then
+            ech "Disable mouse middle button emulation"
             ech "Setting $text = 0 for $device"
-            execute xinput set-int-prop $id $prop 8 0
+            xinput set-int-prop $id $prop 8 0
           fi
         fi
       done
