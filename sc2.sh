@@ -57,7 +57,6 @@ function cleanup {
   set +e
 
   ech "Cleaning up"
-  mousecolor "#000000"
 
   tweak_key_repeat
   cpusave
@@ -72,11 +71,6 @@ function cleanup {
 }
 
 trap "cleanup" SIGINT SIGTERM EXIT
-
-function mousecolor {
-  ech Setting mouse color to "$1"
-  for i in {1..5}; do rivalcfg -c "$1"; done
-}
 
 function tweak_key_repeat {
   # This works on X but not on wayland
@@ -153,8 +147,6 @@ function optimize {
   cpusave
 
   ech "$CYAN$game$NO_COLOR has exited"
-
-  mousecolor "#000000"
 
   echo
 }
