@@ -156,7 +156,7 @@ function main {
     ech "Waiting for SC2 to start..."
     while true; do
       lower_all
-      killproc "winedbg" # SystemSurvey always crashes, which leads to winedbg starting
+      killproc "winedbg" &> /dev/null # SystemSurvey always crashes, which leads to winedbg starting
       disable_mouse_acceleration
 
       local pid=`getpid SC2.exe`
