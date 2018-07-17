@@ -130,8 +130,6 @@ function optimize {
 
   ech "$CYAN$game$NO_COLOR running ($LIGHT_CYAN$pid$NO_COLOR)"
 
-  mousecolor "$color"
-
   cpuperf
   killbnet
 
