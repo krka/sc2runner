@@ -136,6 +136,7 @@ function optimize {
   echo -e "Waiting for $CYAN$game$NO_COLOR ($LIGHT_CYAN$pid$NO_COLOR) to exit..."
   while ps --pid $pid > /dev/null; do
     lower_all
+    disable_mouse_acceleration
     tweak_key_repeat $pid
     sleep 5
   done
@@ -157,7 +158,6 @@ function main {
     while true; do
       lower_all
       killproc "winedbg" &> /dev/null # SystemSurvey always crashes, which leads to winedbg starting
-      disable_mouse_acceleration
 
       local pid=`getpid SC2.exe`
       if [ "x" != "x$pid" ] ; then
