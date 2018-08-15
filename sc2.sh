@@ -32,13 +32,18 @@ function lower_all {
 
 function killproc {
   local procname="$1"
-  local pid=$(ps -ef|grep -E "$procname" |grep -v grep|awk '{print $2}' 2> /dev/null)
-  if [ "x" != "x$pid" ] ; then
-    ech "Killing $CYAN$procname$NO_COLOR"
-    execute kill $pid
-  else
-    ech "No matching process for $CYAN$procname$NO_COLOR"
-  fi
+  local pids=$(ps -ef|grep -E "$procname" |grep -v grep|awk '{print $2}' 2> /dev/null)
+  for pid in $pids ; do
+    if [ "x" != "x$pid" ] ; then
+      ech "Killing $CYAN$procname$NO_COLOR"
+      execute kill $pid
+      if ps $pid > /dev/null ; then
+        execute kill -9 $pid
+      fi
+    else
+      ech "No matching process for $CYAN$procname$NO_COLOR"
+    fi
+  done
 }
 
 function killbnet {
