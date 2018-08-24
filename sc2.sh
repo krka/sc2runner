@@ -30,16 +30,26 @@ function lower_all {
   lower "Agent.exe"
 }
 
+function await_dead {
+  local pid=$1
+  for i in {1..50}; do
+    if ! ps $pid > /dev/null ; then
+      return
+    fi
+    sleep 0.1
+  done
+  execute kill -9 $pid
+}
+
 function killproc {
   local procname="$1"
   local pids=$(ps -ef|grep -E "$procname" |grep -v grep|awk '{print $2}' 2> /dev/null)
   for pid in $pids ; do
     if [ "x" != "x$pid" ] ; then
-      ech "Killing $CYAN$procname$NO_COLOR"
+      local name=$(ps -o cmd= $pid)
+      ech "Killing $CYAN$procname$NO_COLOR ($name)"
       execute kill $pid
-      if ps $pid > /dev/null ; then
-        execute kill -9 $pid
-      fi
+      await_dead $pid
     else
       ech "No matching process for $CYAN$procname$NO_COLOR"
     fi
@@ -136,7 +146,8 @@ function optimize {
   ech "$CYAN$game$NO_COLOR running ($LIGHT_CYAN$pid$NO_COLOR)"
 
   cpuperf
-  killbnet
+
+  #killbnet # This seems to be buggy
 
   echo -e "Waiting for $CYAN$game$NO_COLOR ($LIGHT_CYAN$pid$NO_COLOR) to exit..."
   while ps --pid $pid > /dev/null; do
