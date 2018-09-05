@@ -1,4 +1,7 @@
 #!/bin/bash
+# In case of "Blizzard agent went to sleep. Attempting to wake it up ...":
+# rm -rf .wine/drive_c/ProgramData/Battle.net/
+
 
 cpus=$(cpufreq-info |grep -E "CPU [0-9]+:$" | cut -f 3 -d " "|cut -f 1 -d ":")
 
